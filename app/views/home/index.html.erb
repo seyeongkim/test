@@ -1,0 +1,70 @@
+<div class="container">
+    <form style="margin-top:50px" action="/home/write" method="POST">
+      <div class="form-group">
+        <label for="exampleInputEmail1">Title</label>
+        <input name = "title" type="text" class="form-control"  placeholder="title">
+      </div>
+      <div class="form-group">
+        <label for="exampleInputPassword1">Content</label>
+        <textarea class="form-control" rows ="5" id ="content" name ="content" placeholder="content"></textarea>
+      </div><br>
+      <button type="submit" class="btn btn-default">Submit</button>
+    </form>
+    <hr>
+        <% @posts.each do |p|%>
+        <div class="well">
+        <span style = "font-weight:bold;"><%=p.title %><br></span>
+        <p><%=p.content %></p>
+        <p align="right">글자 수(공백 포함) : <%=p.content.length%>     
+         | 글자 수(공백 제외) :<%=p.content.length - p.content.split.size+1%>
+         | 단어 수 : <%=p.content.split.size%></p>
+        <hr>
+          <div id="reply_<%=p.id%>">
+            <% p.comments.each do |r|%>
+            <p><%= r.content %></p>
+            <% end %>
+          </div>
+        <!--<form style="margin-top:30px" action="/write_comment" method="POST">-->
+          <!--<input name="id_post_id" type="hidden" value ="<%= p.id %>" >-->
+          <div class="form-group">
+          <label for="exampleInputEmail1">comment</label>
+          <input name = "content" type="text" class="form-control" id="content_<%=p.id%>" placeholder="comment">
+          </div>
+          <button type="submit" class="btn btn-default reply_submit" value="<%= p.id %>">complete</button>
+        <!--</form>-->
+
+        </div>
+        <% end %>
+</div>
+
+<script>
+$(function() {
+  $(".reply_submit").click(function(){
+    post_id = this.value;
+    //alert(post_id);
+    post_content = $("#content_" +post_id).val();
+    
+    $.ajax({
+         method: "POST",
+         url: "/write_comment",
+         data: { content: post_content,
+                 id_post_id: post_id},
+         success: function(){
+           $("#reply_" +post_id).append("<p>"+post_content+"</p>");
+           $("#content_" +post_id).val('');
+          // alert("댓글 작성 완료");
+         },
+         error: function(){
+           alert("댓글이 작성되지 않았습니다");
+         }
+    })
+        // .done(function(msg) {
+        //   post_id = this.value
+        //   post_content = $("#content_" + post_id).val();
+        //   alert(post_id);
+        //   ///내용을 바로 써버리는 코드 append이용
+        //   ///placehold내용 지우기
+        // });
+  });
+});
+</script>
